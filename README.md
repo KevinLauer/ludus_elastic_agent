@@ -40,6 +40,9 @@ Available variables are listed below, along with default values (see `defaults/m
     # Sysmon install location
     ludus_elastic_sysmon_path: "C:\\Program Files (x86)\\Sysmon"
 
+    # Agent mode: "detect" or "prevent". Applies either detect or prevent Agent Profile.
+    ludus_elastic_agent_mode: "detect"
+
 ## Dependencies
 
 None.
@@ -54,52 +57,59 @@ None.
     ludus_elastic_enrollment_token: "<TOKEN>"
     ludus_elastic_fleet_server: "https://<IP>:8220" #8220 by default
     ludus_elastic_agent_version: "9.0.1"
+    ludus_elastic_agent_mode: "detect" # or "prevent"
 ```
 
 ## Example Ludus Range Config
 
 ```yaml
 ludus:
-  - vm_name: "{{ range_id }}-jumpbox01"
-    hostname: "{{ range_id }}-jumpbox01"
-    template: debian-12-x64-server-template
-    vlan: 20
-    ip_last_octet: 25
-    ram_gb: 4
-    cpus: 2
-    linux: true
-    testing:
-      snapshot: false
-      block_internet: false
-    roles:
-      - badsectorlabs.ludus_elastic_agent # role_vars are not required when using ludus
-```
-
-Set the `role_vars` to install Elastic agent v8.X:
-```yaml
-ludus:
-  - vm_name: "{{ range_id }}-jumpbox01"
-    hostname: "{{ range_id }}-jumpbox01"
-    template: win2022-server-x64-template
-    vlan: 20
+  - vm_name: "{{ range_id }}-win11-detect"
+    hostname: "{{ range_id }}-WIN11-detect"
+    template: win11-25h2-x64-enterprise-template
+    vlan: 10
     ip_last_octet: 21
-    ram_gb: 6
+    ram_gb: 8
     cpus: 4
     windows:
-      sysprep: true
+      install_additional_tools: false
     roles:
-      - badsectorlabs.ludus_elastic_agent
+      - ludus_elastic_agent
     role_vars:
-      ludus_elastic_agent_version: "8.12.2"
-      ludus_elastic_install_sysmon: false
+      ludus_elastic_agent_mode: "detect"
+
+  - vm_name: "{{ range_id }}-win11-prevent"
+    hostname: "{{ range_id }}-WIN11-prevent"
+    template: win11-25h2-x64-enterprise-template
+    vlan: 10
+    ip_last_octet: 22
+    ram_gb: 8
+    cpus: 4
+    windows:
+      install_additional_tools: false
+    roles:
+      - ludus_elastic_agent
+    role_vars:
+      ludus_elastic_agent_mode: "prevent"
 ```
 
 ## Ludus setup
 
-```
-# Add the role to your ludus host
-ludus ansible roles add badsectorlabs.ludus_elastic_agent
+This role must be installed manually on the Ludus host (it is not on Ansible Galaxy). Use the path to the directory that contains this role:
 
+```bash
+ludus ansible role add -d <path to directory with this role>
+```
+
+Example if the role is in `/opt/elastic-lab/ludus_elastic_agent`:
+
+```bash
+ludus ansible role add -d /opt/elastic-lab/ludus_elastic_agent
+```
+
+Then:
+
+```
 # Get your config into a file so you can assign to your VMs
 ludus range config get > config.yml
 
