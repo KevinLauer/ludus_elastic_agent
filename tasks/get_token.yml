@@ -9,7 +9,7 @@
 
 - name: Get the enrollment-token from the server
   ansible.builtin.slurp:
-    path: "{{ ludus_elastic_container_install_path }}/enrollment_token.txt"
+    path: "{{ ludus_elastic_container_install_path }}/enrollment_token_{{ ludus_elastic_agent_mode }}.txt"
   register: token_slurp
   delegate_to: "{{ ludus_elastic_vm.vm_name }}"
   ignore_errors: true

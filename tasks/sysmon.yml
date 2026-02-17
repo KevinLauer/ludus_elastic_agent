@@ -68,3 +68,7 @@
     - name: Install Sysmon
       ansible.windows.win_shell: |
         & "{{ ludus_elastic_sysmon_path }}\Sysmon.exe" -accepteula -i "{{ ludus_elastic_sysmon_path }}\Sysmon.xml"
+      register: sysmon_install
+      retries: 3
+      delay: 5
+      until: sysmon_install.rc == 0
