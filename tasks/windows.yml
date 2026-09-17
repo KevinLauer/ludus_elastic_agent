@@ -83,5 +83,7 @@
 - name: Install Sysmon if required
   ansible.builtin.include_tasks: sysmon.yml
   when:
-    - (ludus_elastic_install_sysmon is none and ludus_elastic_agent_version is version('9.0.0', '>='))
-      or (ludus_elastic_install_sysmon | default(true, true))
+    - ludus_elastic_install_sysmon | default(
+        ludus_elastic_agent_version is version('9.0.0', '>='),
+        false
+      ) | bool
